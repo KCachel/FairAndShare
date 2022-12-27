@@ -127,3 +127,23 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+
+# ignore ALL files in ANY directory named .idea
+.idea/
+
+# ignore ALL files in ANY directory named __pycache__
+__pycache__/
+/.ipynb_checkpoints/
+
+# ignore .Rhistory
+.Rhistory
+
+
+#ignore paper table files
+equal_paper_table.xlsx
+equal_paper_table_formatted.xlsx
+proportional_paper_table.xlsx
+proportional_paper_table_formatted.xlsx
+reformat_results.R
+rooney_paper_table.xlsx
