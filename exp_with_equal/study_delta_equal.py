@@ -74,30 +74,13 @@ def execute(dataset, k, run_cnt, output_file):
         group_ids[np.where(items < grp_a_size)] = 1
         candidate_db = np.vstack((items, group_ids))
     if dataset == "bean":
-        group_0_str = "BARBUNYA-CALI-BOMBAY-DERMASON"
-        group_1_str = "SEKER-SIRA-HOROZ"
-        bean_raw = pd.read_excel('Dry_Bean_Dataset.xlsx')
-
+        group_0_str = "BARBUNYA-BOMBAY-DERMASON"
+        group_1_str = "CALI-SEKER-SIRA-HOROZ"
+        bean_raw = pd.read_csv('Dry_Bean_Dataset.csv')
         np_candidate_ids = np.arange(0, 13611, 1, dtype=int)
         np_candidate_class = np.array(bean_raw["Class"])
 
         class_int = []
-        # for val in list(np_candidate_class):
-        #     if val == 'BARBUNYA':
-        #         class_int.append(0)
-        #     if val == 'CALI':
-        #         class_int.append(0)
-        #     if val == 'BOMBAY':
-        #         class_int.append(0)
-        #     if val == 'DERMASON':
-        #         class_int.append(0)
-        #     if val == 'SEKER':
-        #         class_int.append(1)
-        #     if val == 'SIRA':
-        #         class_int.append(1)
-        #     if val == 'HOROZ':
-        #         class_int.append(1)
-        # groups = np.asarray(class_int)
 
         for val in list(np_candidate_class):
             if val == 'BARBUNYA':
@@ -115,6 +98,47 @@ def execute(dataset, k, run_cnt, output_file):
             if val == 'HOROZ':
                 class_int.append(1)
         groups = np.asarray(class_int)
+        # group_0_str = "BARBUNYA-CALI-BOMBAY-DERMASON"
+        # group_1_str = "SEKER-SIRA-HOROZ"
+        # bean_raw = pd.read_excel('Dry_Bean_Dataset.xlsx')
+        #
+        # np_candidate_ids = np.arange(0, 13611, 1, dtype=int)
+        # np_candidate_class = np.array(bean_raw["Class"])
+        #
+        # class_int = []
+        # # for val in list(np_candidate_class):
+        # #     if val == 'BARBUNYA':
+        # #         class_int.append(0)
+        # #     if val == 'CALI':
+        # #         class_int.append(0)
+        # #     if val == 'BOMBAY':
+        # #         class_int.append(0)
+        # #     if val == 'DERMASON':
+        # #         class_int.append(0)
+        # #     if val == 'SEKER':
+        # #         class_int.append(1)
+        # #     if val == 'SIRA':
+        # #         class_int.append(1)
+        # #     if val == 'HOROZ':
+        # #         class_int.append(1)
+        # # groups = np.asarray(class_int)
+        #
+        # for val in list(np_candidate_class):
+        #     if val == 'BARBUNYA':
+        #         class_int.append(0)
+        #     if val == 'CALI':
+        #         class_int.append(1)
+        #     if val == 'BOMBAY':
+        #         class_int.append(0)
+        #     if val == 'DERMASON':
+        #         class_int.append(0)
+        #     if val == 'SEKER':
+        #         class_int.append(1)
+        #     if val == 'SIRA':
+        #         class_int.append(1)
+        #     if val == 'HOROZ':
+        #         class_int.append(1)
+        # groups = np.asarray(class_int)
 
         Area = np.array(bean_raw["Area"])
         Area = np.column_stack((np_candidate_ids, Area))
@@ -266,11 +290,11 @@ def execute(dataset, k, run_cnt, output_file):
 
     fairness_string = "equal"
     delta_dict = {}
-    delta_dict = {}
     delta_dict[0] = "fair-"
     delta_dict[1] = ""
     delta_dict[.1] = "fair-"
     delta_dict[.05] = "fair-"
+    np.random.seed(0)
 
 
 
@@ -286,12 +310,12 @@ def execute(dataset, k, run_cnt, output_file):
         set_groups = np.asarray([candidate_db[1, item] for item in K_items_FF])
         proportions_of_sub, prop_ratio = balance(candidate_db[1, :], K_items_FF, set_groups)
         if delta == 1:
-            max_util = np.sum(K_scores_FF)
+            MAX_UTIL = np.sum(K_scores_FF)
             protected_grp = np.argmin(proportions_of_sub)
         subset.append(K_items_FF)
         subset_scores.append(K_scores_FF)
         fairness_goal.append(fairness_string)
-        utility_ratio.append(np.sum(K_scores_FF)/max_util)
+        utility_ratio.append(np.sum(K_scores_FF)/MAX_UTIL)
         method.append(delta_dict[delta]+'fagins')
         fairness_ratio.append(prop_ratio)
         wall_time.append(np.mean(times))
@@ -326,13 +350,12 @@ def execute(dataset, k, run_cnt, output_file):
                 K_items, K_scores = ThresholdFMCS(fairness_string, delta, L_items, L_scores, candidate_db, k, t_style)
                 end_time = time.time()
                 times.append(end_time - start_time)
-            if delta == 1: max_util = np.sum(K_scores)
             set_groups = np.asarray([candidate_db[1, item] for item in K_items])
             proportions_of_sub, prop_ratio = balance(candidate_db[1, :], K_items, set_groups)
             subset.append(K_items)
             subset_scores.append(K_scores)
             fairness_goal.append(fairness_string)
-            utility_ratio.append(np.sum(K_scores) / max_util)
+            utility_ratio.append(np.sum(K_scores) / MAX_UTIL)
             method.append(delta_dict[delta] + t_style.lower())
             fairness_ratio.append(prop_ratio)
             wall_time.append(np.mean(times))
@@ -358,15 +381,174 @@ def execute(dataset, k, run_cnt, output_file):
                  ra_count,
                  data_name, delta_val, group_0_avg_exp, group_1_avg_exp)
 
+    # Greedy Fair
+    for delta in [1, .1, .05, 0]:
+        times = []
+        for t in range(0, run_cnt):
+            start_time = time.time()
+            K_items, K_scores = greedyFMC(fairness_string, delta, L_items, L_scores, candidate_db, k)
+            end_time = time.time()
+            times.append(end_time - start_time)
+        set_groups = np.asarray([candidate_db[1, item] for item in K_items])
+        proportions_of_sub, prop_ratio = balance(candidate_db[1, :], K_items, set_groups)
+        subset.append(K_items)
+        subset_scores.append(K_scores)
+        fairness_goal.append(fairness_string)
+        utility_ratio.append(np.sum(K_scores) / MAX_UTIL)
+        method.append(delta_dict[delta] + 'Greedy_FMC')
+        fairness_ratio.append(prop_ratio)
+        wall_time.append(np.mean(times))
+        data_name.append(dataset)
+        group_0.append(group_0_str)
+        group_1.append(group_1_str)
+        group_0_val.append(proportions_of_sub[0])
+        group_1_val.append(proportions_of_sub[1])
+        _, grp_cnt = np.unique(set_groups, return_counts=True)
+        group_0_cnt.append(np.count_nonzero(set_groups == 0))
+        group_1_cnt.append(np.count_nonzero(set_groups == 1))
+        group_0_avg_exp.append('n/a')
+        group_1_avg_exp.append('n/a')
+        _, _, sa, ra, total_seen = greedyFMC_perfcounts(fairness_string, delta, L_items, L_scores, candidate_db, k)
+        total_positions_seen.append(total_seen)
+        position_seen_prop.append(total_seen / (num_items * num_lists))
+        sa_count.append(sa)
+        ra_count.append(ra)
+        delta_val.append(delta)
+    printoff(output_file, subset, subset_scores, fairness_goal, utility_ratio, method, fairness_ratio, wall_time,
+             total_positions_seen,
+             position_seen_prop, group_0, group_1, group_0_val, group_1_val, group_0_cnt, group_1_cnt, sa_count,
+             ra_count,
+             data_name, delta_val, group_0_avg_exp, group_1_avg_exp)
+    # GBG_Fagins
 
+    for delta in [.1, .05, 0]:
+        times = []
+        for t in range(0, run_cnt):
+            start_time = time.time()
+            K_items, K_scores = GBG_fagin(fairness_string, delta, L_items, L_scores, candidate_db, k)
+            end_time = time.time()
+            times.append(end_time - start_time)
+        set_groups = np.asarray([candidate_db[1, item] for item in K_items])
+        proportions_of_sub, prop_ratio = balance(candidate_db[1, :], K_items, set_groups)
+        subset.append(K_items)
+        subset_scores.append(K_scores)
+        fairness_goal.append(fairness_string)
+        utility_ratio.append(np.sum(K_scores) / MAX_UTIL)
+        method.append(delta_dict[delta] + 'GBG_Fagin')
+        fairness_ratio.append(prop_ratio)
+        wall_time.append(np.mean(times))
+        data_name.append(dataset)
+        group_0.append(group_0_str)
+        group_1.append(group_1_str)
+        group_0_val.append(proportions_of_sub[0])
+        group_1_val.append(proportions_of_sub[1])
+        _, grp_cnt = np.unique(set_groups, return_counts=True)
+        group_0_cnt.append(np.count_nonzero(set_groups == 0))
+        group_1_cnt.append(np.count_nonzero(set_groups == 1))
+        group_0_avg_exp.append('n/a')
+        group_1_avg_exp.append('n/a')
+        _, _, sa, ra, total_seen = GBG_fagin_perfcounts(fairness_string, delta, L_items, L_scores, candidate_db, k)
+        total_positions_seen.append(total_seen)
+        position_seen_prop.append(total_seen / (num_items * num_lists))
+        sa_count.append(sa)
+        ra_count.append(ra)
+        delta_val.append(delta)
+    printoff(output_file, subset, subset_scores, fairness_goal, utility_ratio, method, fairness_ratio, wall_time,
+             total_positions_seen,
+             position_seen_prop, group_0, group_1, group_0_val, group_1_val, group_0_cnt, group_1_cnt, sa_count,
+             ra_count,
+             data_name, delta_val, group_0_avg_exp, group_1_avg_exp)
+
+    # GBG Threshold
+    for t_style in ['TA', 'BPA', 'BPA2']:
+        for delta in [.1, .05, 0]:
+            times = []
+            for t in range(0, run_cnt):
+                start_time = time.time()
+                K_items, K_scores = GBG_threshold(fairness_string, delta, L_items, L_scores, candidate_db, k,
+                                                  t_style)
+                end_time = time.time()
+                times.append(end_time - start_time)
+            if delta == 1: max_util = np.sum(K_scores)
+            set_groups = np.asarray([candidate_db[1, item] for item in K_items])
+            proportions_of_sub, prop_ratio = balance(candidate_db[1, :], K_items, set_groups)
+            subset.append(K_items)
+            subset_scores.append(K_scores)
+            fairness_goal.append(fairness_string)
+            utility_ratio.append(np.sum(K_scores) / MAX_UTIL)
+            method.append(delta_dict[delta] + 'GBG_' + t_style.lower())
+            fairness_ratio.append(prop_ratio)
+            wall_time.append(np.mean(times))
+            data_name.append(dataset)
+            group_0.append(group_0_str)
+            group_1.append(group_1_str)
+            group_0_val.append(proportions_of_sub[0])
+            group_1_val.append(proportions_of_sub[1])
+            _, grp_cnt = np.unique(set_groups, return_counts=True)
+            group_0_cnt.append(np.count_nonzero(set_groups == 0))
+            group_1_cnt.append(np.count_nonzero(set_groups == 1))
+            group_0_avg_exp.append('n/a')
+            group_1_avg_exp.append('n/a')
+            _, _, sa, ra, total_seen = GBG_threshold_perfcounts(fairness_string, delta, L_items, L_scores,
+                                                                candidate_db,
+                                                                k, t_style)
+            total_positions_seen.append(total_seen)
+            position_seen_prop.append(total_seen / (num_items * num_lists))
+            sa_count.append(sa)
+            ra_count.append(ra)
+            delta_val.append(delta)
+        printoff(output_file, subset, subset_scores, fairness_goal, utility_ratio, method, fairness_ratio,
+                 wall_time,
+                 total_positions_seen,
+                 position_seen_prop, group_0, group_1, group_0_val, group_1_val, group_0_cnt, group_1_cnt, sa_count,
+                 ra_count,
+                 data_name, delta_val, group_0_avg_exp, group_1_avg_exp)
+    #DIVTOPK
+    for delta in [1, .1, .05, 0]:
+        times = []
+        for t in range(0, run_cnt):
+            start_time = time.time()
+            K_items_FF, K_scores_FF = baseline_divtopk(fairness_string, delta, L_items, L_scores, candidate_db, k)
+            end_time = time.time()
+            times.append(end_time - start_time)
+        set_groups = np.asarray([candidate_db[1, item] for item in K_items_FF])
+        proportions_of_sub, prop_ratio = balance(candidate_db[1, :], K_items_FF, set_groups)
+        subset.append(K_items_FF)
+        subset_scores.append(K_scores_FF)
+        fairness_goal.append(fairness_string)
+        utility_ratio.append(np.sum(K_scores_FF) / MAX_UTIL)
+        method.append('divtopk')
+        fairness_ratio.append(prop_ratio)
+        wall_time.append(np.mean(times))
+        data_name.append(dataset)
+        group_0.append(group_0_str)
+        group_1.append(group_1_str)
+        group_0_val.append(proportions_of_sub[0])
+        group_1_val.append(proportions_of_sub[1])
+        _, grp_cnt = np.unique(set_groups, return_counts=True)
+        group_0_cnt.append(np.count_nonzero(set_groups == 0))
+        group_1_cnt.append(np.count_nonzero(set_groups == 1))
+        group_0_avg_exp.append('n/a')
+        group_1_avg_exp.append('n/a')
+        #_, _, sa, ra, total_seen = baseline_divtopk_perfcounts(fairness_string, delta, L_items, L_scores, candidate_db, k)
+        total_positions_seen.append(num_items * num_lists)
+        position_seen_prop.append(num_items * num_lists / (num_items * num_lists))
+        sa_count.append(num_items)
+        ra_count.append(0)
+        delta_val.append(delta)
+        printoff(output_file, subset, subset_scores, fairness_goal, utility_ratio, method, fairness_ratio, wall_time,
+                 total_positions_seen,
+                 position_seen_prop, group_0, group_1, group_0_val, group_1_val, group_0_cnt, group_1_cnt, sa_count,
+                 ra_count,
+                 data_name, delta_val, group_0_avg_exp, group_1_avg_exp)
 iter = 5
-# data = 'lc'
-# execute(data, 100, iter, 'equal_study_delta'+ data +'.csv')
-# data = 'hc'
-# execute(data, 100, iter, 'equal_study_delta'+ data +'.csv')
-# data = 'gauss'
-# execute(data, 100, iter, 'equal_study_delta'+ data +'.csv')
+data = 'lc'
+execute(data, 100, iter, 'equal_study_delta'+ data +'.csv')
+data = 'hc'
+execute(data, 100, iter, 'equal_study_delta'+ data +'.csv')
+data = 'gauss'
+execute(data, 100, iter, 'equal_study_delta'+ data +'.csv')
 data = 'bean'
-execute(data, 100, iter, 'equal_study_delta_NEWGROUPS'+ data +'.csv')
-# data = 'iit'
-# execute(data, 1000, iter, 'equal_study_delta'+ data +'.csv')
+execute(data, 100, iter, 'equal_study_delta'+ data +'.csv')
+data = 'iit'
+execute(data, 1000, iter, 'equal_study_delta'+ data +'.csv')

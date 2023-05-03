@@ -242,55 +242,307 @@ def execute(dataset, k, run_cnt, output_file):
 
 
     #Fagins
-    for delta in [1,0]:
-        times = []
-        for t in range(0, run_cnt):
-            start_time = time.time()
-            K_items_FF, K_scores_FF = fairFA(fairness_string, delta, L_items, L_scores, candidate_db, k)
-            end_time = time.time()
-            times.append(end_time - start_time)
+    # for delta in [1,0]:
+    #     times = []
+    #     for t in range(0, run_cnt):
+    #         start_time = time.time()
+    #         K_items_FF, K_scores_FF = fairFA(fairness_string, delta, L_items, L_scores, candidate_db, k)
+    #         end_time = time.time()
+    #         times.append(end_time - start_time)
+    #
+    #     set_groups = np.asarray([candidate_db[1, item] for item in K_items_FF])
+    #     selectRt, sp_val = parity(candidate_db[0, :], candidate_db[1, :], K_items_FF, set_groups)
+    #     if delta == 1:
+    #         max_util = np.sum(K_scores_FF)
+    #         protected_grp = np.argmin(selectRt)
+    #     subset.append(K_items_FF)
+    #     subset_scores.append(K_scores_FF)
+    #     fairness_goal.append(fairness_string)
+    #     utility_ratio.append(np.sum(K_scores_FF)/max_util)
+    #     method.append(delta_dict[delta]+'fagins')
+    #     fairness_ratio.append(sp_val)
+    #     wall_time.append(np.mean(times))
+    #     data_name.append(dataset)
+    #     group_0.append(group_0_str)
+    #     group_1.append(group_1_str)
+    #     group_0_val.append(selectRt[0])
+    #     group_1_val.append(selectRt[1])
+    #     group_0_avg_exp.append('n/a')
+    #     group_1_avg_exp.append('n/a')
+    #     _, grp_cnt = np.unique(set_groups, return_counts=True)
+    #     group_0_cnt.append(grp_cnt[0])
+    #     group_1_cnt.append(grp_cnt[1])
+    #     _, _, sa, ra, total_seen = fairFA_perfcounts(fairness_string, delta, L_items, L_scores, candidate_db, k)
+    #     total_positions_seen.append(total_seen)
+    #     position_seen_prop.append(total_seen / (num_items * num_lists))
+    #     sa_count.append(sa)
+    #     ra_count.append(ra)
+    #     delta_val.append(delta)
+    # printoff(output_file, subset, subset_scores, fairness_goal, utility_ratio, method, fairness_ratio, wall_time,
+    #          total_positions_seen,
+    #          position_seen_prop, group_0, group_1, group_0_val, group_1_val, group_0_cnt, group_1_cnt, sa_count,
+    #          ra_count,
+    #          data_name, delta_val, group_0_avg_exp, group_1_avg_exp)
+    #
+    # # #Thresholds
+    # for t_style in ['TA','BPA', 'BPA2']:
+    #     for delta in [1, 0]:
+    #         times = []
+    #         for t in range(0, run_cnt):
+    #             start_time = time.time()
+    #             K_items, K_scores = ThresholdFMCS(fairness_string, delta, L_items, L_scores, candidate_db, k, t_style)
+    #             end_time = time.time()
+    #             times.append(end_time - start_time)
+    #         if delta == 1: max_util = np.sum(K_scores)
+    #         set_groups = np.asarray([candidate_db[1, item] for item in K_items])
+    #         selectRt, sp_val = parity(candidate_db[0, :], candidate_db[1, :], K_items, set_groups)
+    #         subset.append(K_items)
+    #         subset_scores.append(K_scores)
+    #         fairness_goal.append(fairness_string)
+    #         utility_ratio.append(np.sum(K_scores) / max_util)
+    #         method.append(delta_dict[delta] + t_style.lower())
+    #         fairness_ratio.append(sp_val)
+    #         wall_time.append(np.mean(times))
+    #         data_name.append(dataset)
+    #         group_0.append(group_0_str)
+    #         group_1.append(group_1_str)
+    #         group_0_val.append(selectRt[0])
+    #         group_1_val.append(selectRt[1])
+    #         _, grp_cnt = np.unique(set_groups, return_counts=True)
+    #         group_0_cnt.append(grp_cnt[0])
+    #         group_1_cnt.append(grp_cnt[1])
+    #         group_0_avg_exp.append('n/a')
+    #         group_1_avg_exp.append('n/a')
+    #         _, _, sa, ra, total_seen = ThresholdFMCS_perfcounts(fairness_string, delta, L_items, L_scores, candidate_db, k, t_style)
+    #         total_positions_seen.append(total_seen)
+    #         position_seen_prop.append(total_seen / (num_items * num_lists))
+    #         sa_count.append(sa)
+    #         ra_count.append(ra)
+    #         delta_val.append(delta)
+    #     printoff(output_file, subset, subset_scores, fairness_goal, utility_ratio, method, fairness_ratio, wall_time,
+    #              total_positions_seen,
+    #              position_seen_prop, group_0, group_1, group_0_val, group_1_val, group_0_cnt, group_1_cnt, sa_count,
+    #              ra_count,
+    #              data_name, delta_val, group_0_avg_exp, group_1_avg_exp)
 
-        set_groups = np.asarray([candidate_db[1, item] for item in K_items_FF])
-        selectRt, sp_val = parity(candidate_db[0, :], candidate_db[1, :], K_items_FF, set_groups)
-        if delta == 1:
-            max_util = np.sum(K_scores_FF)
-            protected_grp = np.argmin(selectRt)
-        subset.append(K_items_FF)
-        subset_scores.append(K_scores_FF)
-        fairness_goal.append(fairness_string)
-        utility_ratio.append(np.sum(K_scores_FF)/max_util)
-        method.append(delta_dict[delta]+'fagins')
-        fairness_ratio.append(sp_val)
-        wall_time.append(np.mean(times))
-        data_name.append(dataset)
-        group_0.append(group_0_str)
-        group_1.append(group_1_str)
-        group_0_val.append(selectRt[0])
-        group_1_val.append(selectRt[1])
-        group_0_avg_exp.append('n/a')
-        group_1_avg_exp.append('n/a')
-        _, grp_cnt = np.unique(set_groups, return_counts=True)
-        group_0_cnt.append(grp_cnt[0])
-        group_1_cnt.append(grp_cnt[1])
-        _, _, sa, ra, total_seen = fairFA_perfcounts(fairness_string, delta, L_items, L_scores, candidate_db, k)
-        total_positions_seen.append(total_seen)
-        position_seen_prop.append(total_seen / (num_items * num_lists))
-        sa_count.append(sa)
-        ra_count.append(ra)
-        delta_val.append(delta)
-    printoff(output_file, subset, subset_scores, fairness_goal, utility_ratio, method, fairness_ratio, wall_time,
-             total_positions_seen,
-             position_seen_prop, group_0, group_1, group_0_val, group_1_val, group_0_cnt, group_1_cnt, sa_count,
-             ra_count,
-             data_name, delta_val, group_0_avg_exp, group_1_avg_exp)
+
+
+    #Zehlike
+    # calculate p value
+    # for protected_grp in [0,1]:
+    #     _, grp_sizes = np.unique(candidate_db[1, :], return_counts=True)
+    #     prob_distribution = grp_sizes / num_items
+    #     print("prob distribution", prob_distribution, "protected_group", protected_grp)
+    #     p = prob_distribution[protected_grp]
+    #     times = []
+    #     for t in range(0, run_cnt):
+    #        start_time = time.time()
+    #        K_items_FF, K_scores_FF = baseline_FAIR(protected_grp, p, L_items, L_scores, candidate_db, k)
+    #        end_time = time.time()
+    #        times.append(end_time - start_time)
+    #     set_groups = np.asarray([candidate_db[1, item] for item in K_items_FF])
+    #     selectRt, sp_val = parity(candidate_db[0, :], candidate_db[1, :], K_items_FF, set_groups)
+    #     subset.append(K_items_FF)
+    #     subset_scores.append(K_scores_FF)
+    #     fairness_goal.append(fairness_string)
+    #     utility_ratio.append(np.sum(K_scores_FF)/max_util)
+    #     method.append('fa*ir-'+'protected'+str(protected_grp) +'-p='+ str(p))
+    #     fairness_ratio.append(sp_val)
+    #     wall_time.append(np.mean(times))
+    #     data_name.append(dataset)
+    #     group_0.append(group_0_str)
+    #     group_1.append(group_1_str)
+    #     group_0_val.append(selectRt[0])
+    #     group_1_val.append(selectRt[1])
+    #     _, grp_cnt = np.unique(set_groups, return_counts=True)
+    #     group_0_cnt.append(grp_cnt[0])
+    #     group_1_cnt.append(grp_cnt[1])
+    #     group_0_avg_exp.append('n/a')
+    #     group_1_avg_exp.append('n/a')
+    #     #_, _, sa, ra, total_seen = baseline_FAIR_perfcounts(protected_grp, p, L_items, L_scores, candidate_db, k)
+    #     total_positions_seen.append(num_items * num_lists)
+    #     position_seen_prop.append(num_items * num_lists / (num_items * num_lists))
+    #     sa_count.append(num_items)
+    #     ra_count.append(0)
+    #     delta_val.append('n/a')
+    #     printoff(output_file, subset, subset_scores, fairness_goal, utility_ratio, method, fairness_ratio, wall_time,
+    #              total_positions_seen,
+    #              position_seen_prop, group_0, group_1, group_0_val, group_1_val, group_0_cnt, group_1_cnt, sa_count,
+    #              ra_count,
+    #              data_name, delta_val, group_0_avg_exp, group_1_avg_exp)
+
+
+    #DIVTOPK
+    # times = []
+    # for t in range(0, run_cnt):
+    #     start_time = time.time()
+    #     K_items_FF, K_scores_FF = baseline_divtopk(fairness_string, delta, L_items, L_scores, candidate_db, k)
+    #     end_time = time.time()
+    #     times.append(end_time - start_time)
+    # set_groups = np.asarray([candidate_db[1, item] for item in K_items_FF])
+    # selectRt, sp_val = parity(candidate_db[0, :], candidate_db[1, :], K_items_FF, set_groups)
+    # subset.append(K_items_FF)
+    # subset_scores.append(K_scores_FF)
+    # fairness_goal.append(fairness_string)
+    # utility_ratio.append(np.sum(K_scores_FF) / max_util)
+    # method.append('divtopk')
+    # fairness_ratio.append(sp_val)
+    # wall_time.append(np.mean(times))
+    # data_name.append(dataset)
+    # group_0.append(group_0_str)
+    # group_1.append(group_1_str)
+    # group_0_val.append(selectRt[0])
+    # group_1_val.append(selectRt[1])
+    # _, grp_cnt = np.unique(set_groups, return_counts=True)
+    # group_0_cnt.append(grp_cnt[0])
+    # group_1_cnt.append(grp_cnt[1])
+    # group_0_avg_exp.append('n/a')
+    # group_1_avg_exp.append('n/a')
+    # #_, _, sa, ra, total_seen = baseline_divtopk_perfcounts(fairness_string, delta, L_items, L_scores, candidate_db, k)
+    # total_positions_seen.append(num_items * num_lists)
+    # position_seen_prop.append(num_items * num_lists / (num_items * num_lists))
+    # sa_count.append(num_items)
+    # ra_count.append(0)
+    # delta_val.append('n/a')
+    # printoff(output_file, subset, subset_scores, fairness_goal, utility_ratio, method, fairness_ratio, wall_time,
+    #          total_positions_seen,
+    #          position_seen_prop, group_0, group_1, group_0_val, group_1_val, group_0_cnt, group_1_cnt, sa_count,
+    #          ra_count,
+    #          data_name, delta_val, group_0_avg_exp, group_1_avg_exp)
+
+    #Gupta
+    # DDP_val = 0.05
+    # times = []
+    # for t in range(0, run_cnt):
+    #     start_time = time.time()
+    #     K_items_FF, K_scores_FF, avg_exp = baseline_FGS(DDP_val, L_items, L_scores, candidate_db, k)
+    #     end_time = time.time()
+    #     times.append(end_time - start_time)
+    # set_groups = np.asarray([candidate_db[1, item] for item in K_items_FF])
+    # selectRt, sp_val = parity(candidate_db[0, :], candidate_db[1, :], K_items_FF, set_groups)
+    # subset.append(K_items_FF)
+    # subset_scores.append(K_scores_FF)
+    # fairness_goal.append(fairness_string)
+    # utility_ratio.append(np.sum(K_scores_FF) / max_util)
+    # method.append('fair-exposure')
+    # fairness_ratio.append(sp_val)
+    # wall_time.append(np.mean(times))
+    # data_name.append(dataset)
+    # group_0.append(group_0_str)
+    # group_1.append(group_1_str)
+    # group_0_val.append(selectRt[0])
+    # group_1_val.append(selectRt[1])
+    # _, grp_cnt = np.unique(set_groups, return_counts=True)
+    # group_0_cnt.append(grp_cnt[0])
+    # group_1_cnt.append(grp_cnt[1])
+    # group_0_avg_exp.append(avg_exp[0])
+    # group_1_avg_exp.append(avg_exp[1])
+    # #_, _, sa, ra, total_seen = baseline_FGS_perfcounts(DDP_val, L_items, L_scores, candidate_db, k)
+    # total_positions_seen.append(num_items * num_lists)
+    # position_seen_prop.append(num_items * num_lists / (num_items * num_lists))
+    # sa_count.append(num_items)
+    # ra_count.append(0)
+    # delta_val.append('n/a')
+    # printoff(output_file, subset, subset_scores, fairness_goal, utility_ratio, method, fairness_ratio, wall_time,
+    #          total_positions_seen,
+    #          position_seen_prop, group_0, group_1, group_0_val, group_1_val, group_0_cnt, group_1_cnt, sa_count,
+    #          ra_count,
+    #          data_name, delta_val, group_0_avg_exp, group_1_avg_exp)
+    #
+    # # Feng
+    # epsilon = 0.6
+    # times = []
+    # sp_val_init = 0
+    # for t in range(0, run_cnt):
+    #     seed = t
+    #     start_time = time.time()
+    #     K_items_eg, K_scores_eg= baseline_fengetal(epsilon, L_items, L_scores, candidate_db, k, seed)
+    #     end_time = time.time()
+    #     times.append(end_time - start_time)
+    #     set_groups = np.asarray([candidate_db[1, item] for item in K_items_eg])
+    #     selectRt, sp_val = parity(candidate_db[0, :], candidate_db[1, :], K_items_eg, set_groups)
+    #     if sp_val > sp_val_init:
+    #         K_items_FF = K_items_eg
+    #         K_scores_FF = K_scores_eg #save best of iter
+    # set_groups = np.asarray([candidate_db[1, item] for item in K_items_FF])
+    # selectRt, sp_val = parity(candidate_db[0, :], candidate_db[1, :], K_items_FF, set_groups)
+    # subset.append(K_items_FF)
+    # subset_scores.append(K_scores_FF)
+    # fairness_goal.append(fairness_string)
+    # utility_ratio.append(np.sum(K_scores_FF) / max_util)
+    # method.append('fair-epsilon-greedy')
+    # fairness_ratio.append(sp_val)
+    # wall_time.append(np.mean(times))
+    # data_name.append(dataset)
+    # group_0.append(group_0_str)
+    # group_1.append(group_1_str)
+    # group_0_val.append(selectRt[0])
+    # group_1_val.append(selectRt[1])
+    # _, grp_cnt = np.unique(set_groups, return_counts=True)
+    # group_0_cnt.append(grp_cnt[0])
+    # group_1_cnt.append(grp_cnt[1])
+    # group_0_avg_exp.append('n/a')
+    # group_1_avg_exp.append('n/a')
+    # total_positions_seen.append(num_items * num_lists)
+    # position_seen_prop.append(num_items * num_lists / (num_items * num_lists))
+    # sa_count.append(num_items)
+    # ra_count.append(0)
+    # delta_val.append('n/a')
+    # printoff(output_file, subset, subset_scores, fairness_goal, utility_ratio, method, fairness_ratio, wall_time,
+    #          total_positions_seen,
+    #          position_seen_prop, group_0, group_1, group_0_val, group_1_val, group_0_cnt, group_1_cnt, sa_count,
+    #          ra_count,
+    #          data_name, delta_val, group_0_avg_exp, group_1_avg_exp)
+    # GBG Fagins
+    # for delta in [1, 0]:
+    #     times = []
+    #     for t in range(0, run_cnt):
+    #         start_time = time.time()
+    #         K_items_FF, K_scores_FF = GBG_fagin(fairness_string, delta, L_items, L_scores, candidate_db, k)
+    #         end_time = time.time()
+    #         times.append(end_time - start_time)
+    #
+    #     set_groups = np.asarray([candidate_db[1, item] for item in K_items_FF])
+    #     selectRt, sp_val = parity(candidate_db[0, :], candidate_db[1, :], K_items_FF, set_groups)
+    #     if delta == 1:
+    #         max_util = np.sum(K_scores_FF)
+    #         protected_grp = np.argmin(selectRt)
+    #     subset.append(K_items_FF)
+    #     subset_scores.append(K_scores_FF)
+    #     fairness_goal.append(fairness_string)
+    #     utility_ratio.append(np.sum(K_scores_FF) / max_util)
+    #     method.append(delta_dict[delta] + 'GBG_' + 'fagins')
+    #     fairness_ratio.append(sp_val)
+    #     wall_time.append(np.mean(times))
+    #     data_name.append(dataset)
+    #     group_0.append(group_0_str)
+    #     group_1.append(group_1_str)
+    #     group_0_val.append(selectRt[0])
+    #     group_1_val.append(selectRt[1])
+    #     group_0_avg_exp.append('n/a')
+    #     group_1_avg_exp.append('n/a')
+    #     _, grp_cnt = np.unique(set_groups, return_counts=True)
+    #     group_0_cnt.append(grp_cnt[0])
+    #     group_1_cnt.append(grp_cnt[1])
+    #     _, _, sa, ra, total_seen = GBG_fagin_perfcounts(fairness_string, delta, L_items, L_scores, candidate_db, k)
+    #     total_positions_seen.append(total_seen)
+    #     position_seen_prop.append(total_seen / (num_items * num_lists))
+    #     sa_count.append(sa)
+    #     ra_count.append(ra)
+    #     delta_val.append(delta)
+    # printoff(output_file, subset, subset_scores, fairness_goal, utility_ratio, method, fairness_ratio, wall_time,
+    #          total_positions_seen,
+    #          position_seen_prop, group_0, group_1, group_0_val, group_1_val, group_0_cnt, group_1_cnt, sa_count,
+    #          ra_count,
+    #          data_name, delta_val, group_0_avg_exp, group_1_avg_exp)
 
     # #Thresholds
-    for t_style in ['TA','BPA', 'BPA2']:
+    for t_style in ['TA', 'BPA', 'BPA2']:
         for delta in [1, 0]:
             times = []
             for t in range(0, run_cnt):
                 start_time = time.time()
-                K_items, K_scores = ThresholdFMCS(fairness_string, delta, L_items, L_scores, candidate_db, k, t_style)
+                K_items, K_scores = GBG_threshold(fairness_string, delta, L_items, L_scores, candidate_db, k, t_style, rand_g_repro)
                 end_time = time.time()
                 times.append(end_time - start_time)
             if delta == 1: max_util = np.sum(K_scores)
@@ -300,7 +552,7 @@ def execute(dataset, k, run_cnt, output_file):
             subset_scores.append(K_scores)
             fairness_goal.append(fairness_string)
             utility_ratio.append(np.sum(K_scores) / max_util)
-            method.append(delta_dict[delta] + t_style.lower())
+            method.append(delta_dict[delta] + 'GBG_' + t_style.lower())
             fairness_ratio.append(sp_val)
             wall_time.append(np.mean(times))
             data_name.append(dataset)
@@ -313,7 +565,8 @@ def execute(dataset, k, run_cnt, output_file):
             group_1_cnt.append(grp_cnt[1])
             group_0_avg_exp.append('n/a')
             group_1_avg_exp.append('n/a')
-            _, _, sa, ra, total_seen = ThresholdFMCS_perfcounts(fairness_string, delta, L_items, L_scores, candidate_db, k, t_style)
+            _, _, sa, ra, total_seen = GBG_threshold_perfcounts(fairness_string, delta, L_items, L_scores, candidate_db,
+                                                                k, t_style)
             total_positions_seen.append(total_seen)
             position_seen_prop.append(total_seen / (num_items * num_lists))
             sa_count.append(sa)
@@ -324,29 +577,25 @@ def execute(dataset, k, run_cnt, output_file):
                  position_seen_prop, group_0, group_1, group_0_val, group_1_val, group_0_cnt, group_1_cnt, sa_count,
                  ra_count,
                  data_name, delta_val, group_0_avg_exp, group_1_avg_exp)
-
-
-
-    #Zehlike
-    # calculate p value
-    for protected_grp in [0,1]:
-        _, grp_sizes = np.unique(candidate_db[1, :], return_counts=True)
-        prob_distribution = grp_sizes / num_items
-        print("prob distribution", prob_distribution, "protected_group", protected_grp)
-        p = prob_distribution[protected_grp]
+    # Gredy Fair
+    for delta in [1, 0]:
         times = []
         for t in range(0, run_cnt):
-           start_time = time.time()
-           K_items_FF, K_scores_FF = baseline_FAIR(protected_grp, p, L_items, L_scores, candidate_db, k)
-           end_time = time.time()
-           times.append(end_time - start_time)
+            start_time = time.time()
+            K_items_FF, K_scores_FF = greedyFMC(fairness_string, delta, L_items, L_scores, candidate_db, k)
+            end_time = time.time()
+            times.append(end_time - start_time)
+
         set_groups = np.asarray([candidate_db[1, item] for item in K_items_FF])
         selectRt, sp_val = parity(candidate_db[0, :], candidate_db[1, :], K_items_FF, set_groups)
+        if delta == 1:
+            max_util = np.sum(K_scores_FF)
+            protected_grp = np.argmin(selectRt)
         subset.append(K_items_FF)
         subset_scores.append(K_scores_FF)
         fairness_goal.append(fairness_string)
-        utility_ratio.append(np.sum(K_scores_FF)/max_util)
-        method.append('fa*ir-'+'protected'+str(protected_grp) +'-p='+ str(p))
+        utility_ratio.append(np.sum(K_scores_FF) / max_util)
+        method.append(delta_dict[delta] + 'Greedy_FMC')
         fairness_ratio.append(sp_val)
         wall_time.append(np.mean(times))
         data_name.append(dataset)
@@ -354,140 +603,17 @@ def execute(dataset, k, run_cnt, output_file):
         group_1.append(group_1_str)
         group_0_val.append(selectRt[0])
         group_1_val.append(selectRt[1])
+        group_0_avg_exp.append('n/a')
+        group_1_avg_exp.append('n/a')
         _, grp_cnt = np.unique(set_groups, return_counts=True)
         group_0_cnt.append(grp_cnt[0])
         group_1_cnt.append(grp_cnt[1])
-        group_0_avg_exp.append('n/a')
-        group_1_avg_exp.append('n/a')
-        #_, _, sa, ra, total_seen = baseline_FAIR_perfcounts(protected_grp, p, L_items, L_scores, candidate_db, k)
-        total_positions_seen.append(num_items * num_lists)
-        position_seen_prop.append(num_items * num_lists / (num_items * num_lists))
-        sa_count.append(num_items)
-        ra_count.append(0)
-        delta_val.append('n/a')
-        printoff(output_file, subset, subset_scores, fairness_goal, utility_ratio, method, fairness_ratio, wall_time,
-                 total_positions_seen,
-                 position_seen_prop, group_0, group_1, group_0_val, group_1_val, group_0_cnt, group_1_cnt, sa_count,
-                 ra_count,
-                 data_name, delta_val, group_0_avg_exp, group_1_avg_exp)
-
-
-    #DIVTOPK
-    times = []
-    for t in range(0, run_cnt):
-        start_time = time.time()
-        K_items_FF, K_scores_FF = baseline_divtopk(fairness_string, delta, L_items, L_scores, candidate_db, k)
-        end_time = time.time()
-        times.append(end_time - start_time)
-    set_groups = np.asarray([candidate_db[1, item] for item in K_items_FF])
-    selectRt, sp_val = parity(candidate_db[0, :], candidate_db[1, :], K_items_FF, set_groups)
-    subset.append(K_items_FF)
-    subset_scores.append(K_scores_FF)
-    fairness_goal.append(fairness_string)
-    utility_ratio.append(np.sum(K_scores_FF) / max_util)
-    method.append('divtopk')
-    fairness_ratio.append(sp_val)
-    wall_time.append(np.mean(times))
-    data_name.append(dataset)
-    group_0.append(group_0_str)
-    group_1.append(group_1_str)
-    group_0_val.append(selectRt[0])
-    group_1_val.append(selectRt[1])
-    _, grp_cnt = np.unique(set_groups, return_counts=True)
-    group_0_cnt.append(grp_cnt[0])
-    group_1_cnt.append(grp_cnt[1])
-    group_0_avg_exp.append('n/a')
-    group_1_avg_exp.append('n/a')
-    #_, _, sa, ra, total_seen = baseline_divtopk_perfcounts(fairness_string, delta, L_items, L_scores, candidate_db, k)
-    total_positions_seen.append(num_items * num_lists)
-    position_seen_prop.append(num_items * num_lists / (num_items * num_lists))
-    sa_count.append(num_items)
-    ra_count.append(0)
-    delta_val.append('n/a')
-    printoff(output_file, subset, subset_scores, fairness_goal, utility_ratio, method, fairness_ratio, wall_time,
-             total_positions_seen,
-             position_seen_prop, group_0, group_1, group_0_val, group_1_val, group_0_cnt, group_1_cnt, sa_count,
-             ra_count,
-             data_name, delta_val, group_0_avg_exp, group_1_avg_exp)
-
-    #Gupta
-    DDP_val = 0.05
-    times = []
-    for t in range(0, run_cnt):
-        start_time = time.time()
-        K_items_FF, K_scores_FF, avg_exp = baseline_FGS(DDP_val, L_items, L_scores, candidate_db, k)
-        end_time = time.time()
-        times.append(end_time - start_time)
-    set_groups = np.asarray([candidate_db[1, item] for item in K_items_FF])
-    selectRt, sp_val = parity(candidate_db[0, :], candidate_db[1, :], K_items_FF, set_groups)
-    subset.append(K_items_FF)
-    subset_scores.append(K_scores_FF)
-    fairness_goal.append(fairness_string)
-    utility_ratio.append(np.sum(K_scores_FF) / max_util)
-    method.append('fair-exposure')
-    fairness_ratio.append(sp_val)
-    wall_time.append(np.mean(times))
-    data_name.append(dataset)
-    group_0.append(group_0_str)
-    group_1.append(group_1_str)
-    group_0_val.append(selectRt[0])
-    group_1_val.append(selectRt[1])
-    _, grp_cnt = np.unique(set_groups, return_counts=True)
-    group_0_cnt.append(grp_cnt[0])
-    group_1_cnt.append(grp_cnt[1])
-    group_0_avg_exp.append(avg_exp[0])
-    group_1_avg_exp.append(avg_exp[1])
-    #_, _, sa, ra, total_seen = baseline_FGS_perfcounts(DDP_val, L_items, L_scores, candidate_db, k)
-    total_positions_seen.append(num_items * num_lists)
-    position_seen_prop.append(num_items * num_lists / (num_items * num_lists))
-    sa_count.append(num_items)
-    ra_count.append(0)
-    delta_val.append('n/a')
-    printoff(output_file, subset, subset_scores, fairness_goal, utility_ratio, method, fairness_ratio, wall_time,
-             total_positions_seen,
-             position_seen_prop, group_0, group_1, group_0_val, group_1_val, group_0_cnt, group_1_cnt, sa_count,
-             ra_count,
-             data_name, delta_val, group_0_avg_exp, group_1_avg_exp)
-
-    # Feng
-    epsilon = 0.6
-    times = []
-    sp_val_init = 0
-    for t in range(0, run_cnt):
-        seed = t
-        start_time = time.time()
-        K_items_eg, K_scores_eg= baseline_fengetal(epsilon, L_items, L_scores, candidate_db, k, seed)
-        end_time = time.time()
-        times.append(end_time - start_time)
-        set_groups = np.asarray([candidate_db[1, item] for item in K_items_eg])
-        selectRt, sp_val = parity(candidate_db[0, :], candidate_db[1, :], K_items_eg, set_groups)
-        if sp_val > sp_val_init:
-            K_items_FF = K_items_eg
-            K_scores_FF = K_scores_eg #save best of iter
-    set_groups = np.asarray([candidate_db[1, item] for item in K_items_FF])
-    selectRt, sp_val = parity(candidate_db[0, :], candidate_db[1, :], K_items_FF, set_groups)
-    subset.append(K_items_FF)
-    subset_scores.append(K_scores_FF)
-    fairness_goal.append(fairness_string)
-    utility_ratio.append(np.sum(K_scores_FF) / max_util)
-    method.append('fair-epsilon-greedy')
-    fairness_ratio.append(sp_val)
-    wall_time.append(np.mean(times))
-    data_name.append(dataset)
-    group_0.append(group_0_str)
-    group_1.append(group_1_str)
-    group_0_val.append(selectRt[0])
-    group_1_val.append(selectRt[1])
-    _, grp_cnt = np.unique(set_groups, return_counts=True)
-    group_0_cnt.append(grp_cnt[0])
-    group_1_cnt.append(grp_cnt[1])
-    group_0_avg_exp.append('n/a')
-    group_1_avg_exp.append('n/a')
-    total_positions_seen.append(num_items * num_lists)
-    position_seen_prop.append(num_items * num_lists / (num_items * num_lists))
-    sa_count.append(num_items)
-    ra_count.append(0)
-    delta_val.append('n/a')
+        _, _, sa, ra, total_seen = greedyFMC_perfcounts(fairness_string, delta, L_items, L_scores, candidate_db, k)
+        total_positions_seen.append(total_seen)
+        position_seen_prop.append(total_seen / (num_items * num_lists))
+        sa_count.append(sa)
+        ra_count.append(ra)
+        delta_val.append(delta)
     printoff(output_file, subset, subset_scores, fairness_goal, utility_ratio, method, fairness_ratio, wall_time,
              total_positions_seen,
              position_seen_prop, group_0, group_1, group_0_val, group_1_val, group_0_cnt, group_1_cnt, sa_count,
@@ -495,12 +621,12 @@ def execute(dataset, k, run_cnt, output_file):
              data_name, delta_val, group_0_avg_exp, group_1_avg_exp)
 
 iter = 5
-data = 'lc'
-execute(data, 100, iter, 'proportional_task'+ data +'.csv')
-data = 'hc'
-execute(data, 100, iter, 'proportional_task'+ data +'.csv')
-data = 'gauss'
-execute(data, 100, iter, 'proportional_task'+ data +'.csv')
+# data = 'lc'
+# execute(data, 100, iter, 'proportional_task'+ data +'.csv')
+# data = 'hc'
+# execute(data, 100, iter, 'proportional_task'+ data +'.csv')
+# data = 'gauss'
+# execute(data, 100, iter, 'proportional_task'+ data +'.csv')
 data = 'bank'
 execute(data, 80, iter, 'proportional_task'+ data +'.csv')
 data = 'credit'
