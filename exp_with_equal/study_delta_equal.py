@@ -541,6 +541,51 @@ def execute(dataset, k, run_cnt, output_file):
                  position_seen_prop, group_0, group_1, group_0_val, group_1_val, group_0_cnt, group_1_cnt, sa_count,
                  ra_count,
                  data_name, delta_val, group_0_avg_exp, group_1_avg_exp)
+
+    #Zehlike
+    # calculate p value
+    if dataset != 'iit':
+        for protected_grp in [0,1]:
+            _, grp_sizes = np.unique(candidate_db[1, :], return_counts=True)
+            p = 0.5 #for equal
+            times = []
+            for t in range(0, run_cnt):
+               start_time = time.time()
+               K_items_FF, K_scores_FF = baseline_FAIR(protected_grp, p, L_items, L_scores, candidate_db, k)
+               end_time = time.time()
+               times.append(end_time - start_time)
+            set_groups = np.asarray([candidate_db[1, item] for item in K_items_FF])
+            proportions_of_sub, prop_ratio = balance(candidate_db[1, :], K_items_FF, set_groups)
+            subset.append(K_items_FF)
+            subset_scores.append(K_scores_FF)
+            fairness_goal.append(fairness_string)
+            utility_ratio.append(np.sum(K_scores_FF)/MAX_UTIL)
+            method.append('fa*ir-'+'protected'+str(protected_grp) +'-p='+ str(p))
+            fairness_ratio.append(prop_ratio)
+            wall_time.append(np.mean(times))
+            data_name.append(dataset)
+            group_0.append(group_0_str)
+            group_1.append(group_1_str)
+            group_0_val.append(proportions_of_sub[0])
+            group_1_val.append(proportions_of_sub[1])
+            _, grp_cnt = np.unique(set_groups, return_counts=True)
+            group_0_cnt.append(np.count_nonzero(set_groups == 0))
+            group_1_cnt.append(np.count_nonzero(set_groups == 1))
+            group_0_avg_exp.append('n/a')
+            group_1_avg_exp.append('n/a')
+            #_, _, sa, ra, total_seen = baseline_FAIR_perfcounts(protected_grp, p, L_items, L_scores, candidate_db, k)
+            total_positions_seen.append(num_items * num_lists)
+            position_seen_prop.append(num_items * num_lists / (num_items * num_lists))
+            sa_count.append(num_items)
+            ra_count.append(0)
+            delta_val.append('n/a')
+            printoff(output_file, subset, subset_scores, fairness_goal, utility_ratio, method, fairness_ratio, wall_time,
+                     total_positions_seen,
+                     position_seen_prop, group_0, group_1, group_0_val, group_1_val, group_0_cnt, group_1_cnt, sa_count,
+                     ra_count,
+                     data_name, delta_val, group_0_avg_exp, group_1_avg_exp)
+
+
 iter = 5
 data = 'lc'
 execute(data, 100, iter, 'equal_study_delta'+ data +'.csv')
