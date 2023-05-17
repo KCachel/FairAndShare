@@ -116,6 +116,9 @@ def execute(dataset, k, run_cnt, output_file):
     delta_dict = {}
     delta_dict[0] = "fair-"
     delta_dict[1] = ""
+    delta_dictfs = {}
+    delta_dictfs[0] = "fair-share-"
+    delta_dictfs[1] = ""
     np.random.seed(0)
 
     # Fagins
@@ -137,7 +140,7 @@ def execute(dataset, k, run_cnt, output_file):
         subset_scores.append(K_scores_FF)
         fairness_goal.append(fairness_string)
         utility_ratio.append(np.sum(K_scores_FF)/MAX_UTIL)
-        method.append(delta_dict[delta]+'fagins')
+        method.append(delta_dictfs[delta]+'fagins')
         wall_time.append(np.mean(times))
         data_name.append(dataset)
         grp_cnt = count_grp_members(candidate_db[1, :], set_groups)
@@ -158,7 +161,7 @@ def execute(dataset, k, run_cnt, output_file):
              ra_count,
              data_name, count_White, count_Black, count_Asian, count_AmIn, count_Other, r_value)
     # #Thresholds
-    for t_style in ['TA','BPA', 'BPA2']:
+    for t_style in ['BPA2']:
         for r_cnt in [0,5,10]:
             fairness_string = 'rooney ' + str(r_cnt)
             r = r_cnt
@@ -166,7 +169,7 @@ def execute(dataset, k, run_cnt, output_file):
             times = []
             for t in range(0, run_cnt):
                 start_time = time.time()
-                K_items, K_scores = ThresholdFMCS(fairness_string, delta, L_items, L_scores, candidate_db, k, t_style)
+                K_items, K_scores = FairShare(fairness_string, delta, L_items, L_scores, candidate_db, k, t_style)
                 end_time = time.time()
                 times.append(end_time - start_time)
             set_groups = np.asarray([candidate_db[1, item] for item in K_items])
@@ -174,7 +177,7 @@ def execute(dataset, k, run_cnt, output_file):
             subset_scores.append(K_scores)
             fairness_goal.append(fairness_string)
             utility_ratio.append(np.sum(K_scores) / MAX_UTIL)
-            method.append(delta_dict[delta] + t_style.lower())
+            method.append(delta_dictfs[delta] + t_style.lower())
             wall_time.append(np.mean(times))
             data_name.append(dataset)
             grp_cnt = count_grp_members(candidate_db[1, :], set_groups)
@@ -183,7 +186,7 @@ def execute(dataset, k, run_cnt, output_file):
             count_Asian.append(grp_cnt[2])
             count_AmIn.append(grp_cnt[3])
             count_Other.append(grp_cnt[4])
-            _, _, sa, ra, total_seen = ThresholdFMCS_perfcounts(fairness_string, delta, L_items, L_scores, candidate_db, k, t_style)
+            _, _, sa, ra, total_seen = FairShare_perfcounts(fairness_string, delta, L_items, L_scores, candidate_db, k, t_style)
             total_positions_seen.append(total_seen)
             position_seen_prop.append(total_seen / (num_items * num_lists))
             sa_count.append(sa)
@@ -236,46 +239,9 @@ def execute(dataset, k, run_cnt, output_file):
                  ra_count,
                  data_name, count_White, count_Black, count_Asian, count_AmIn, count_Other, r_value)
 
-    # GBG Fagins
-    rand_g_repro = np.random.randint(max(candidate_db[1, :]), size=1)[0]
-    for r_cnt in [0,5,10]:
-        fairness_string = 'rooney ' + str(r_cnt)
-        r = r_cnt
-        delta = 0
-        times = []
-        for t in range(0, run_cnt):
-            start_time = time.time()
-            K_items_FF, K_scores_FF = GBG_fagin(fairness_string, delta, L_items, L_scores, candidate_db, k)
-            end_time = time.time()
-            times.append(end_time - start_time)
 
-        set_groups = np.asarray([candidate_db[1, item] for item in K_items_FF])
-        subset.append(K_items_FF)
-        subset_scores.append(K_scores_FF)
-        fairness_goal.append(fairness_string)
-        utility_ratio.append(np.sum(K_scores_FF)/MAX_UTIL)
-        method.append(delta_dict[delta]+'GBG' + 'fagins')
-        wall_time.append(np.mean(times))
-        data_name.append(dataset)
-        grp_cnt = count_grp_members(candidate_db[1, :], set_groups)
-        count_White.append(grp_cnt[0])
-        count_Black.append(grp_cnt[1])
-        count_Asian.append(grp_cnt[2])
-        count_AmIn.append(grp_cnt[3])
-        count_Other.append(grp_cnt[4])
-        _, _, sa, ra, total_seen = GBG_fagin_perfcounts(fairness_string, delta, L_items, L_scores, candidate_db, k)
-        total_positions_seen.append(total_seen)
-        position_seen_prop.append(total_seen / (num_items * num_lists))
-        sa_count.append(sa)
-        ra_count.append(ra)
-        r_value.append(r)
-    printoff(output_file, subset, subset_scores, fairness_goal, utility_ratio, method, wall_time,
-             total_positions_seen,
-             position_seen_prop, sa_count,
-             ra_count,
-             data_name, count_White, count_Black, count_Asian, count_AmIn, count_Other, r_value)
     # #GBG Thresholds
-    for t_style in ['TA','BPA', 'BPA2']:
+    for t_style in ['BPA2']:
         for r_cnt in [0,5, 10]:
             fairness_string = 'rooney ' + str(r_cnt)
             r = r_cnt
@@ -283,7 +249,7 @@ def execute(dataset, k, run_cnt, output_file):
             times = []
             for t in range(0, run_cnt):
                 start_time = time.time()
-                K_items, K_scores = GBG_threshold(fairness_string, delta, L_items, L_scores, candidate_db, k, t_style, rand_g_repro)
+                K_items, K_scores = GBG_threshold(fairness_string, delta, L_items, L_scores, candidate_db, k, t_style)
                 end_time = time.time()
                 times.append(end_time - start_time)
             set_groups = np.asarray([candidate_db[1, item] for item in K_items])
@@ -300,7 +266,7 @@ def execute(dataset, k, run_cnt, output_file):
             count_Asian.append(grp_cnt[2])
             count_AmIn.append(grp_cnt[3])
             count_Other.append(grp_cnt[4])
-            _, _, sa, ra, total_seen = GBG_threshold_perfcounts(fairness_string, delta, L_items, L_scores, candidate_db, k, t_style, rand_g_repro)
+            _, _, sa, ra, total_seen = GBG_threshold_perfcounts(fairness_string, delta, L_items, L_scores, candidate_db, k, t_style)
             total_positions_seen.append(total_seen)
             position_seen_prop.append(total_seen / (num_items * num_lists))
             sa_count.append(sa)
@@ -355,4 +321,4 @@ def execute(dataset, k, run_cnt, output_file):
 k = 100
 iter = 5
 data = 'adult'
-execute(data, k, iter, 'rooney_rtask'+ data +'.csv')
+execute(data, k, iter, 'XXXrooney_rtask'+ data +'.csv')

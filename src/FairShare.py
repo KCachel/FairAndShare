@@ -1,6 +1,6 @@
 import numpy as np
 
-def fairness_criteria(candidate_db, k, fairness, delta):
+def fairness_calibrator(candidate_db, k, fairness, delta):
     """
     Fairness calibrator to determine the necessary lower bounds on each group according to fairness and delta.
     :param candidate_db: A numpy array (shape 2 x n) of each item's group membership,
@@ -71,9 +71,9 @@ def find_bestposition_vals(bp_vals, seen_positions):
     return bp_vals
 
 
-def ThresholdFMCS(fairness, delta, L_items, L_scores, candidate_db, k, t_style):
+def FairShare(fairness, delta, L_items, L_scores, candidate_db, k, t_style):
     """
-    Threshold style algorithm for fair multi-criteria selection.
+    Fair multi-criteria selection. Run with t_style == "bpa2".
     :param fairness: String either 'proportional', 'equal' or 'rooney <x>', where <x> is an int.
     :param delta: Float fairness-utility parameter [0,1], where 0 is strict fairness and 1 is utility maximizing.
     :param L_items: A numpy array (shape n x m) of the items in the sorted list.
@@ -86,12 +86,10 @@ def ThresholdFMCS(fairness, delta, L_items, L_scores, candidate_db, k, t_style):
     """
 
     if fairness == 'proportional' or fairness == 'equal':
-        floor_ids, floors = fairness_criteria(candidate_db, k, fairness, delta)
+        floor_ids, floors = fairness_calibrator(candidate_db, k, fairness, delta)
     else: #rooney
         r = int(fairness.split()[1])
         floor_ids, floors = rooney_calibrator(candidate_db, r)
-
-
 
 
 
@@ -449,7 +447,7 @@ def ThresholdFMCS(fairness, delta, L_items, L_scores, candidate_db, k, t_style):
             K_items = K_items.astype(int, copy=False)
             return K_items, K_scores
 
-def ThresholdFMCS_perfcounts(fairness, delta, L_items, L_scores, candidate_db, k, t_style):
+def FairShare_perfcounts(fairness, delta, L_items, L_scores, candidate_db, k, t_style):
     """
     Threshold style algorithm for fair multi-criteria selection with performance metrics returned.
     :param fairness: String either 'proportional', 'equal' or 'rooney <x>', where <x> is an int.
@@ -467,7 +465,7 @@ def ThresholdFMCS_perfcounts(fairness, delta, L_items, L_scores, candidate_db, k
 
 
     if fairness == 'proportional' or fairness == 'equal':
-        floor_ids, floors = fairness_criteria(candidate_db, k, fairness, delta)
+        floor_ids, floors = fairness_calibrator(candidate_db, k, fairness, delta)
     else: #rooney
         r = int(fairness.split()[1])
         floor_ids, floors = rooney_calibrator(candidate_db, r)

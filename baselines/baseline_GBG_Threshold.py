@@ -1,6 +1,6 @@
 import numpy as np
 from baselines.baseline_greedyfmc import *
-from src import fairness_criteria, rooney_calibrator
+from src import fairness_calibrator, rooney_calibrator
 
 
 def find_bestposition_vals(bp_vals, seen_positions):
@@ -34,7 +34,7 @@ def GBG_threshold(fairness, delta, L_items, L_scores, candidate_db, k, t_style):
                     total_seen_positions: count of total positions seen.
     """
     if fairness == 'proportional' or fairness == 'equal':
-        floor_ids, floors = fairness_criteria(candidate_db, k, fairness, delta)
+        floor_ids, floors = fairness_calibrator(candidate_db, k, fairness, delta)
     else: #rooney
         r = int(fairness.split()[1])
         floor_ids, floors = rooney_calibrator(candidate_db, r)
@@ -100,7 +100,7 @@ def GBG_threshold_perfcounts(fairness, delta, L_items, L_scores, candidate_db, k
                     total_seen_positions: count of total positions seen.
     """
     if fairness == 'proportional' or fairness == 'equal':
-        floor_ids, floors = fairness_criteria(candidate_db, k, fairness, delta)
+        floor_ids, floors = fairness_calibrator(candidate_db, k, fairness, delta)
     else:  # rooney
         r = int(fairness.split()[1])
         floor_ids, floors = rooney_calibrator(candidate_db, r)

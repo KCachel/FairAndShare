@@ -7,7 +7,7 @@
 """
 import numpy as np
 from baselines.aggscores import sorted_aggscores
-from src import fairness_criteria, rooney_calibrator
+from src import fairness_calibrator, rooney_calibrator
 
 
 def baseline_divtopk(fairness, delta, L_items, L_scores, candidate_db, k):
@@ -24,7 +24,7 @@ def baseline_divtopk(fairness, delta, L_items, L_scores, candidate_db, k):
     """
 
     if fairness == 'proportional' or fairness == 'equal':
-        floor_ids, floors = fairness_criteria(candidate_db, k, fairness, delta)
+        floor_ids, floors = fairness_calibrator(candidate_db, k, fairness, delta)
     else: #rooney
         r = int(fairness.split()[1])
         floor_ids, floors = rooney_calibrator(candidate_db, r)
@@ -87,7 +87,7 @@ def baseline_divtopk_perfcounts(fairness, delta, L_items, L_scores, candidate_db
     """
 
     if fairness == 'proportional' or fairness == 'equal':
-        floor_ids, floors = fairness_criteria(candidate_db, k, fairness, delta)
+        floor_ids, floors = fairness_calibrator(candidate_db, k, fairness, delta)
     else: #rooney
         r = int(fairness.split()[1])
         floor_ids, floors = rooney_calibrator(candidate_db, r)

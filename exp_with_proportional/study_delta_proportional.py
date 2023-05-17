@@ -236,6 +236,11 @@ def execute(dataset, k, run_cnt, output_file):
     delta_dict[.1] = "fair-"
     delta_dict[.05] = "fair-"
     np.random.seed(0)
+    delta_dictfs = {}
+    delta_dictfs[0] = "fair-share-"
+    delta_dictfs[1] = ""
+    delta_dictfs[.1] = "fair-share-"
+    delta_dictfs[.05] = "fair-share-"
 
 
 
@@ -255,7 +260,7 @@ def execute(dataset, k, run_cnt, output_file):
         subset_scores.append(K_scores_FF)
         fairness_goal.append(fairness_string)
         utility_ratio.append(np.sum(K_scores_FF)/MAX_UTIL)
-        method.append(delta_dict[delta]+'fagins')
+        method.append(delta_dictfs[delta]+'fagins')
         fairness_ratio.append(sp_val)
         wall_time.append(np.mean(times))
         data_name.append(dataset)
@@ -278,12 +283,12 @@ def execute(dataset, k, run_cnt, output_file):
              ra_count, data_name, delta_val)
 
     #Thresholds
-    for t_style in ['TA','BPA', 'BPA2']:
-        for delta in [.1, .05, 0]:
+    for t_style in ['BPA2']:
+        for delta in [1, .1, .05, 0]:
             times = []
             for t in range(0, run_cnt):
                 start_time = time.time()
-                K_items, K_scores = ThresholdFMCS(fairness_string, delta, L_items, L_scores, candidate_db, k, t_style)
+                K_items, K_scores = FairShare(fairness_string, delta, L_items, L_scores, candidate_db, k, t_style)
                 end_time = time.time()
                 times.append(end_time - start_time)
             set_groups = np.asarray([candidate_db[1, item] for item in K_items])
@@ -292,7 +297,7 @@ def execute(dataset, k, run_cnt, output_file):
             subset_scores.append(K_scores)
             fairness_goal.append(fairness_string)
             utility_ratio.append(np.sum(K_scores) / MAX_UTIL)
-            method.append(delta_dict[delta] + t_style.lower())
+            method.append(delta_dictfs[delta] + t_style.lower())
             fairness_ratio.append(sp_val)
             wall_time.append(np.mean(times))
             data_name.append(dataset)
@@ -303,7 +308,7 @@ def execute(dataset, k, run_cnt, output_file):
             _, grp_cnt = np.unique(set_groups, return_counts=True)
             group_0_cnt.append(grp_cnt[0])
             group_1_cnt.append(grp_cnt[1])
-            _, _, sa, ra, total_seen = ThresholdFMCS_perfcounts(fairness_string, delta, L_items, L_scores, candidate_db, k, t_style)
+            _, _, sa, ra, total_seen = FairShare_perfcounts(fairness_string, delta, L_items, L_scores, candidate_db, k, t_style)
             total_positions_seen.append(total_seen)
             position_seen_prop.append(total_seen / (num_items * num_lists))
             sa_count.append(sa)
@@ -314,41 +319,7 @@ def execute(dataset, k, run_cnt, output_file):
                  position_seen_prop, group_0, group_1, group_0_val, group_1_val, group_0_cnt, group_1_cnt, sa_count,
                  ra_count, data_name, delta_val)
 
-    # GBG Fagins
-    for delta in [.1, .05, 0]:
-        times = []
-        for t in range(0, run_cnt):
-            start_time = time.time()
-            K_items_FF, K_scores_FF = GBG_fagin(fairness_string, delta, L_items, L_scores, candidate_db, k)
-            end_time = time.time()
-            times.append(end_time - start_time)
-        set_groups = np.asarray([candidate_db[1, item] for item in K_items_FF])
-        selectRt, sp_val = parity(candidate_db[0, :], candidate_db[1, :], K_items_FF, set_groups)
-        subset.append(K_items_FF)
-        subset_scores.append(K_scores_FF)
-        fairness_goal.append(fairness_string)
-        utility_ratio.append(np.sum(K_scores_FF) / MAX_UTIL)
-        method.append(delta_dict[delta] + "GBG" + 'fagins')
-        fairness_ratio.append(sp_val)
-        wall_time.append(np.mean(times))
-        data_name.append(dataset)
-        group_0.append(group_0_str)
-        group_1.append(group_1_str)
-        group_0_val.append(selectRt[0])
-        group_1_val.append(selectRt[1])
-        _, grp_cnt = np.unique(set_groups, return_counts=True)
-        group_0_cnt.append(np.count_nonzero(set_groups==0))
-        group_1_cnt.append(np.count_nonzero(set_groups))
-        _, _, sa, ra, total_seen = GBG_fagin_perfcounts(fairness_string, delta, L_items, L_scores, candidate_db, k)
-        total_positions_seen.append(total_seen)
-        position_seen_prop.append(total_seen / (num_items * num_lists))
-        sa_count.append(sa)
-        ra_count.append(ra)
-        delta_val.append(delta)
-    printoff(output_file, subset, subset_scores, fairness_goal, utility_ratio, method, fairness_ratio, wall_time,
-             total_positions_seen,
-             position_seen_prop, group_0, group_1, group_0_val, group_1_val, group_0_cnt, group_1_cnt, sa_count,
-             ra_count, data_name, delta_val)
+
 
     # GBG Thresholds
     for t_style in ['BPA2']:
@@ -505,7 +476,7 @@ def execute(dataset, k, run_cnt, output_file):
 
 iter = 1
 data = 'lc'
-execute(data, 100, iter, 'proportional_study_delta'+ data +'.csv')
+execute(data, 100, iter, 'XXXproportional_study_delta'+ data +'.csv')
 data ='hc'
 execute(data, 100, iter, 'proportional_study_delta'+ data +'.csv')
 data = 'gauss'
