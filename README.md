@@ -1,7 +1,7 @@
 # Fair-Multi-Criteria-Candidate-Set-Selection
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-Corresponding code, and experiments for paper "Fair & Share: Fast and Fair Candidate Set Selections from Multi-Criteria". 
+Corresponding code, and experiments for paper "Fair & Share: Fast and Fair Multi-Criteria Selections". 
 
 
 #### Fair&Share and F&S-Fagin's code:
